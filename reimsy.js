@@ -11,12 +11,19 @@ const ReimSY = (function() {
     class ReimSY {
 
         static PHRASETYPES = [
+            ["and-if", ReimSY.checkEqual],
+            ["if", ReimSY.checkGreaterThanZero],
+            ["count-if", ReimSY.justCount],
+            ["or-if", ReimSY.onlyOne]
+        ];
+		
+		static PHRASETYPES_DE = [
             ["und-wenn", ReimSY.checkEqual],
             ["wenn", ReimSY.checkGreaterThanZero],
             ["zähle-wenn", ReimSY.justCount],
             ["oder-wenn", ReimSY.onlyOne]
         ];
-
+		
         static checkEqual(cluster, childrenLength) {
             return cluster.targetNumber === childrenLength;
         }
@@ -67,10 +74,11 @@ const ReimSY = (function() {
             return false;
         }
 
-        constructor() {
+        constructor(lang = 'en') {
 
             this.sentenceFinder = new PhraseFinder();
             this.phraseFinder = new PhraseFinder();
+			this.phraseTypes = this.lang === 'en' ? ReimSY.PHRASETYPES : ReimSY.PHRASETYPES_DE;
             this.sentences = [];
             this.sentenceBatch = [];
             this.allValidFormulas = [];
@@ -91,7 +99,7 @@ const ReimSY = (function() {
 
                 if (!sentence) {
 
-                    sentence = new Sentence(firstPhraseRoot, this.phraseFinder);
+                    sentence = new Sentence(firstPhraseRoot, this.phraseTypes, this.phraseFinder);
 
                     this.sentences.push(sentence);
                     this.sentenceBatch.push(sentence);
@@ -99,11 +107,6 @@ const ReimSY = (function() {
 
                     this.sentenceFinder.addStringArray(firstPhraseRoot, sentence);
 
-                }
-
-                if (words.length === 3 && sentence) {
-
-                    //sentence.phraseGroups = {};
                 }
 
                 for (let i = 3; i < words.length; i += 4) {
@@ -231,7 +234,6 @@ const ReimSY = (function() {
         }
 
 
-
     }
 
     class Observable {
@@ -311,16 +313,16 @@ const ReimSY = (function() {
     }
 
     class Sentence extends Observable {
-        constructor(root, phraseFinder) {
+        constructor(root, phraseTypes, phraseFinder) {
             super();
             this.root = root;
             this.output = [];
+			this.phraseTypes = phraseTypes;
             this.phraseGroups = {};
             this.validClusters = [];
             this.valid = false;
             this.simpleTruth = false;
             this.phraseFinder = phraseFinder;
-
 
         }
 
@@ -330,15 +332,11 @@ const ReimSY = (function() {
             let group = this.phraseGroups[grouphead];
 
             if (!group) {
-                group = new PhraseGroup(grouphead);
+                group = new PhraseGroup(grouphead, this.phraseTypes);
                 this.phraseGroups[grouphead] = group;
             }
 
             group.addChild(newPhrase);
-        }
-
-        clear() {
-
         }
 
         synthesize() {
@@ -351,8 +349,6 @@ const ReimSY = (function() {
 
                 parentPhrases.forEach(parentPhrase => {
                     if (parentPhrase) {
-
-
 
                         parentPhrase.addChild(this);
 
@@ -377,7 +373,6 @@ const ReimSY = (function() {
 
                 this.output = this.cluster2Output();
 
-
                 if (this.root.includes("%Result")) {
 
                     this.output = [this.root];
@@ -387,7 +382,6 @@ const ReimSY = (function() {
                     Object.values(this.phraseGroups).forEach(group => {
                         counterFunktion = group.logicFunction;
                     });
-
 
                     let counterResult = counterFunktion(null, this.validClusters.length);
 
@@ -399,8 +393,6 @@ const ReimSY = (function() {
                     );
 
                 }
-
-
 
             } else {
                 this.output = [this.root];
@@ -442,10 +434,11 @@ const ReimSY = (function() {
     }
 
     class PhraseGroup extends Observable {
-        constructor(head) {
+        constructor(head, phraseTypes) {
             super();
             this.head = head;
-            this.logicFunction = ReimSY.PHRASETYPES.find(([type, func]) => type === head)?.[1] || null;
+			this.phraseTypes = phraseTypes;
+            this.logicFunction = this.phraseTypes.find(([type, func]) => type === head)?.[1] || null;
             this.clusters = [];
         }
 
@@ -583,7 +576,6 @@ const ReimSY = (function() {
 
             console.log("%c      Clusters Targetnumber: " + this.targetNumber, "color: orange;");
 
-
             this.clusterElements.forEach(entry => {
 
                 entry.debug();
@@ -632,9 +624,7 @@ const ReimSY = (function() {
                 const formattedString = Array.from(this.assumptions)
                 const result = formattedString.map(item => `${item[0]}: ${item[1]}`).join("; ");
 
-
                 console.log("         " + result + " by %c" + this.origin.root.join(' '), "font-style: italic;");
-
 
             }
         }
