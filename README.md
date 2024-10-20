@@ -4,7 +4,7 @@ ReimSY is a lightweight JS class for evaluating logical statements.
 
 ## Creating an Instance
 
-let myInstance = new ReimSY();
+let demo = new ReimSY();
 
 ## Adding Statements  
 
