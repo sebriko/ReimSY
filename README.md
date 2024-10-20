@@ -6,19 +6,15 @@ ReimSY is a lightweight JS class for evaluating logical statements.
 
 let myInstance = new ReimSY();
 
-## Adding Statements  
+## Adding and evaluating Statements  
 
-### Example 1:
-
-myInstance.add("Time", "is", "12.00");
-
-### Example 2:
-
-myInstance.add("The sky", "is", "blue", "if", "Time", "is", "12.00");
+demo.add("Device", "Status", "on", "when", "LED", "lights", "green");
+demo.add("LED", "lights", "green");
 
 ## Evaluating the Result
 
-let result = myInstance.evaluate();
+let result = demo.evaluate();
+console.log(result); // [["LED", "lights", "green"], ["Device", "Status", "on"]]
 
 ## Additional Notes:
 
