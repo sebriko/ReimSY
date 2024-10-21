@@ -8,14 +8,14 @@ let demo = new ReimSY();
 
 ## Adding Statements  
 
-demo.add("Device", "Status", "on", "when", "LED", "lights", "green");
+demo.add("device", "status", "on", "if", "LED", "color", "green");
 
-demo.add("LED", "lights", "green");
+demo.add("LED", "color", "green");
 
 ## Evaluating the Result
 
 let result = demo.evaluate();
-console.log(result); // [["LED", "lights", "green"], ["Device", "Status", "on"]]
+console.log(result); // [["LED", "color", "green"], ["device", "status", "on"]]
 
 ## Additional Notes:
 
