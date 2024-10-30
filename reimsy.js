@@ -12,18 +12,36 @@ const ReimSY = (function ()
 {
 	class ReimSY
 	{
-		static PHRASETYPES = [
-			["and-if", ReimSY.checkEqual],
-			["if", ReimSY.checkGreaterThanZero],
-			["count-if", ReimSY.justCount],
-			["or-if", ReimSY.onlyOne]
+		static PHRASETYPES_TRANSLATIONS = {
+			en: {
+				checkEqual: "and-if",
+				checkGreaterThanZero: "if",
+				justCount: "count-if",
+				onlyOne: "or-if",
+				notIf: "not-if"
+			},
+			de: {
+				checkEqual: "und-wenn",
+				checkGreaterThanZero: "wenn",
+				justCount: "zähle-wenn",
+				onlyOne: "oder-wenn",
+				notIf: "nicht-wenn"
+			}
+		};
+		static PHRASETYPES_BASE = [
+			{ key: "checkEqual", func: ReimSY.checkEqual, value: true },
+			{ key: "checkGreaterThanZero", func: ReimSY.checkGreaterThanZero, value: true },
+			{ key: "justCount", func: ReimSY.justCount, value: true },
+			{ key: "onlyOne", func: ReimSY.onlyOne, value: true },
+			{ key: "notIf", func: ReimSY.notIf, value: true }
 		];
-		static PHRASETYPES_DE = [
-			["und-wenn", ReimSY.checkEqual],
-			["wenn", ReimSY.checkGreaterThanZero],
-			["zähle-wenn", ReimSY.justCount],
-			["oder-wenn", ReimSY.onlyOne]
-		];
+		static getPhraseTypes(language) {
+			return this.PHRASETYPES_BASE.map(item => [
+				this.PHRASETYPES_TRANSLATIONS[language][item.key],
+				item.func,
+				item.value
+			]);
+		}
 		static checkEqual(cluster, childrenLength)
 		{
 			return cluster.targetNumber === childrenLength;
@@ -39,6 +57,9 @@ const ReimSY = (function ()
 		static onlyOne(cluster, childrenLength)
 		{
 			return cluster.targetNumber === 1;
+		}
+		static notIf(cluster, childrenLength) {
+			return cluster.targetNumber !== childrenLength;
 		}
 		static isNumber(value, commaAsDecimal = false)
 		{
@@ -73,9 +94,10 @@ const ReimSY = (function ()
 
 		constructor(lang = 'en')
 		{
+			this.lang = lang;
 			this.sentenceFinder = new PhraseFinder();
 			this.phraseFinder = new PhraseFinder();
-			this.phraseTypes = this.lang === 'en' ? ReimSY.PHRASETYPES : ReimSY.PHRASETYPES_DE;
+			this.phraseTypes = ReimSY.getPhraseTypes(this.lang);
 			this.sentences = [];
 			this.sentenceBatch = [];
 			this.allValidFormulas = [];
@@ -190,12 +212,9 @@ const ReimSY = (function ()
 
 		debug()
 		{
-
 			this.sentences.forEach(sentence =>
 			{
-
 				sentence.debug();
-
 			});
 		}
 
@@ -252,7 +271,6 @@ const ReimSY = (function ()
 			this.formContent = formula[2];
 			this.compute = this.createFunction(this.formContent);
 			this.dependencies = this.extractVariables(this.formContent);
-
 		}
 
 		createFunction(formula)
@@ -265,9 +283,7 @@ const ReimSY = (function ()
 			formula = formula.replace(/cos/g, 'Math.cos');
 			formula = formula.replace(/tan/g, 'Math.tan');
 			formula = formula.replace(/PI/g, 'Math.PI');
-
 			return new Function('params', 'return ' + formula);
-
 		}
 
 		evaluate()
@@ -287,7 +303,7 @@ const ReimSY = (function ()
 			});
 
 			return variablesObject;
-		}
+		} 
 	}
 
 	class Sentence extends Observable
@@ -334,7 +350,6 @@ const ReimSY = (function ()
 			}
 		}
 
-
 		clusterize()
 		{
 			Object.values(this.phraseGroups).forEach(group =>
@@ -345,7 +360,6 @@ const ReimSY = (function ()
 
 		evaluate()
 		{
-
 			if (this.simpleTruth === false)
 			{
 				this.validClusters = Object.values(this.phraseGroups).flatMap(group => group.evaluate());
@@ -365,15 +379,12 @@ const ReimSY = (function ()
 						)
 					);
 				}
-			}
-			else
-			{
+			} else {
 				this.output = [this.root];
 			}
 
 			return this.output;
 		}
-
 
 		cluster2Output()
 		{
@@ -389,12 +400,10 @@ const ReimSY = (function ()
 					}
 					return token;
 				});
-
 				uniqueOutput.add(JSON.stringify(outputRoot));
 			});
 			return [...uniqueOutput].map(item => JSON.parse(item));
 		}
-
 
 		debug()
 		{
@@ -423,7 +432,6 @@ const ReimSY = (function ()
 			this.children.forEach(entry =>
 			{
 				entry.clusterize();
-
 			});
 			this.createClusterRoots();
 			this.extendClusters()
@@ -458,15 +466,10 @@ const ReimSY = (function ()
 							cluster.extend(clusterElement);
 							cluster.targetNumber += 1;
 						}
-						else
-						{
-
-						}
 					});
 				});
 			});
 		}
-
 
 		evaluate()
 		{
@@ -479,7 +482,6 @@ const ReimSY = (function ()
 			this.children.forEach(entry =>
 			{
 				entry.debug();
-
 			});
 			this.clusters.forEach(entry =>
 			{
