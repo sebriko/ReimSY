@@ -54,9 +54,7 @@ const ReimSY = (function() {
 
             const decimalSeparator = commaAsDecimal ? ',' : '.';
 
-
             const normalizedValue = value.replace(',', '.');
-
 
             return !isNaN(Number(normalizedValue));
 
@@ -86,7 +84,6 @@ const ReimSY = (function() {
             this.phraseFinder = new PhraseFinder();
 			this.phraseTypes = this.lang === 'en' ? ReimSY.PHRASETYPES : ReimSY.PHRASETYPES_DE;
             this.sentences = [];
-            this.sentenceBatch = [];
             this.allValidFormulas = [];
             this.output = [];
             this.inputHashtable = new Set();
@@ -98,7 +95,6 @@ const ReimSY = (function() {
 
             if (ReimSY.processHash(words, this.inputHashtable)) {
 
-
                 const firstPhraseRoot = words.slice(0, 3);
 
                 let sentence = this.sentenceFinder.getValues(firstPhraseRoot, false)[0];
@@ -108,12 +104,14 @@ const ReimSY = (function() {
                     sentence = new Sentence(firstPhraseRoot, this.phraseTypes, this.phraseFinder);
 
                     this.sentences.push(sentence);
-                    this.sentenceBatch.push(sentence);
-
 
                     this.sentenceFinder.addStringArray(firstPhraseRoot, sentence);
 
                 }
+				
+				if (words.length <= 4) {
+					sentence.simpleTruth = true;
+				}
 
                 for (let i = 3; i < words.length; i += 4) {
                     const content = words.slice(i, i + 4);
@@ -129,20 +127,15 @@ const ReimSY = (function() {
         }
 
         addBatch(arrays) {
-
             arrays.forEach(array => this.add(array));
-
         }
 
         synthesize() {
-            this.sentenceBatch.forEach(sentence => sentence.synthesize());
+            this.sentences.forEach(sentence => sentence.synthesize());
         }
 
         clusterize() {
-            while (this.sentenceBatch.length > 0) {
-                let sentence = this.sentenceBatch.shift();
-                sentence.clusterize();
-            }
+			this.sentences.forEach(sentence => sentence.clusterize());
         }
 
         evaluate() {
@@ -171,7 +164,6 @@ const ReimSY = (function() {
 
             }
 
-
             return this.output;
         }
 
@@ -185,7 +177,6 @@ const ReimSY = (function() {
                     let mathFormula = new MathFormula(subArray);
 
                     this.allValidFormulas.push(mathFormula)
-
 
                 }
             });
@@ -237,12 +228,10 @@ const ReimSY = (function() {
             });
         }
 
-
     }
 
     class Observable {
         constructor() {
-            this.valid = false;
             this.children = [];
             this.childOf = [];
         }
@@ -251,24 +240,17 @@ const ReimSY = (function() {
             this.children.push(child);
             child.childOf.push(this);
         }
+		
+		hasChild(child) {
+			if (!child || !Array.isArray(child.root)) {
+				return false;
+			}
 
-        updateFromChildren() {
-            this.children.forEach(child => {
-                child.updateFromChildren();
-                if (!child.valid && this.valid !== false) {
-                    this.updateValid(false);
-                }
-            });
-        }
-
-        updateValid(value) {
-            this.valid = value;
-            this.childOf.forEach(parent => {
-                if (parent.valid !== false) {
-                    parent.updateValid(false);
-                }
-            });
-        }
+			return this.children.some(c => 
+				Array.isArray(c.root) && 
+				c.root.every((val, index) => val === child.root[index])
+			);
+		}
     }
 
 
@@ -324,7 +306,8 @@ const ReimSY = (function() {
 			this.phraseTypes = phraseTypes;
             this.phraseGroups = {};
             this.validClusters = [];
-            this.valid = false;
+			this.synthesized = false;
+			this.clusterized = false;
             this.simpleTruth = false;
             this.phraseFinder = phraseFinder;
 
@@ -344,16 +327,17 @@ const ReimSY = (function() {
         }
 
         synthesize() {
-            if (Object.keys(this.phraseGroups).length === 0) {
+			
+            if ((Object.keys(this.phraseGroups).length === 0 || this.simpleTruth===true) && this.synthesized===false) {
 
                 this.simpleTruth = true;
-                this.valid = true;
-
+		
                 const parentPhrases = this.phraseFinder.getValues(this.root, true);
 
                 parentPhrases.forEach(parentPhrase => {
-                    if (parentPhrase) {
-
+                    if (parentPhrase && parentPhrase.hasChild(this)===false) {
+						this.synthesized = true;
+						parentPhrase.clusterized = false;
                         parentPhrase.addChild(this);
 
                     }
@@ -389,7 +373,6 @@ const ReimSY = (function() {
 
                     let counterResult = counterFunktion(null, this.validClusters.length);
 
-                    // Ersetze %Result in allen Unterarrays durch den berechneten Wert
                     this.output = this.output.map(subArray =>
                         subArray.map(element =>
                             element === "%Result" ? counterResult : element
@@ -522,22 +505,36 @@ const ReimSY = (function() {
             super();
             this.head = input.shift();
             this.root = input;
+			this.clusterized = false;
             this.clusterElements = [];
         }
 
         clusterize() {
+			
+			if (this.clusterized === false) {
+				
+			this.clearCluster();
 
             this.clusterElements = [];
 
             this.children.forEach(entry => {
-
+				
                 const newClusterElement = new ClusterElement(entry, this);
 
                 this.clusterElements.push(newClusterElement);
+	
 
             });
+			
+			this.clusterized = true;
+			
+			}
 
         }
+		
+		clearCluster() {
+			this.clusterElements = [];
+		}
 
         debug() {
 
@@ -551,7 +548,6 @@ const ReimSY = (function() {
         constructor(rootClusterElement) {
             super();
 
-            this.valid = false;
             this.targetNumber = 0;
             this.rootClusterElement = rootClusterElement || [];
             this.assumptions = new Set(rootClusterElement.assumptions);
