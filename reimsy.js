@@ -18,6 +18,8 @@ const ReimSY = (function() {
 			["not-if", ReimSY.notEvenOne]
         ];
 		
+		static NEGATIONWORD = "not";
+		
 		static PHRASETYPES_DE = [
             ["und-wenn", ReimSY.checkEqual],
             ["wenn", ReimSY.checkGreaterThanZero],
@@ -25,6 +27,8 @@ const ReimSY = (function() {
             ["oder-wenn", ReimSY.onlyOne],
 			["nicht-wenn", ReimSY.notEvenOne]
         ];
+		
+		static NEGATIONWORD_DE = "nicht";
 		
         static checkEqual(cluster, childrenLength) {
             return cluster.targetNumber === childrenLength;
@@ -79,10 +83,10 @@ const ReimSY = (function() {
         }
 
         constructor(lang = 'en') {
-
             this.sentenceFinder = new PhraseFinder();
             this.phraseFinder = new PhraseFinder();
 			this.phraseTypes = this.lang === 'en' ? ReimSY.PHRASETYPES : ReimSY.PHRASETYPES_DE;
+			this.negationWord = this.lang === 'en' ? ReimSY.NEGATIONWORD : ReimSY.NEGATIONWORD_DE;
             this.sentences = [];
             this.allValidFormulas = [];
             this.output = [];
@@ -101,7 +105,7 @@ const ReimSY = (function() {
 
                 if (!sentence) {
 
-                    sentence = new Sentence(firstPhraseRoot, this.phraseTypes, this.phraseFinder);
+                    sentence = new Sentence(firstPhraseRoot, this.phraseTypes, this.phraseFinder, this.negationWord);
 
                     this.sentences.push(sentence);
 
@@ -299,11 +303,14 @@ const ReimSY = (function() {
     }
 
     class Sentence extends Observable {
-        constructor(root, phraseTypes, phraseFinder) {
+        constructor(root, phraseTypes, phraseFinder, negationWord) {
             super();
             this.root = root;
             this.output = [];
+			this.negativeOutput = [];
+			this.positiveOutput = [];
 			this.phraseTypes = phraseTypes;
+			this.negationWord = negationWord;
             this.phraseGroups = {};
             this.validClusters = [];
 			this.synthesized = false;
@@ -319,6 +326,7 @@ const ReimSY = (function() {
             let group = this.phraseGroups[grouphead];
 
             if (!group) {
+				if (grouphead)
                 group = new PhraseGroup(grouphead, this.phraseTypes);
                 this.phraseGroups[grouphead] = group;
             }
@@ -357,9 +365,21 @@ const ReimSY = (function() {
 
             if (this.simpleTruth === false) {
 
-                this.validClusters = Object.values(this.phraseGroups).flatMap(group => group.evaluate());
-
-                this.output = this.cluster2Output();
+				this.validClusters = Object.values(this.phraseGroups)
+				  .filter(group => !group.head.includes(this.negationWord))
+				  .flatMap(group => group.evaluate());
+				  
+				this.validNegativeClusters = Object.values(this.phraseGroups)
+				  .filter(group => group.head.includes(this.negationWord))
+				  .flatMap(group => group.evaluate());  
+				
+                this.positiveOutput = this.cluster2Output(this.validClusters);
+				this.negativeOutput = this.cluster2Output(this.validNegativeClusters);
+				
+				this.output = this.positiveOutput.filter(
+					posItem => !this.negativeOutput.some(negItem => JSON.stringify(posItem) === JSON.stringify(negItem))
+				);
+				
 
                 if (this.root.includes("%Result")) {
 
@@ -389,10 +409,10 @@ const ReimSY = (function() {
         }
 
 
-        cluster2Output() {
+        cluster2Output(validClusters) {
             const uniqueOutput = new Set();
 
-            this.validClusters.forEach(cluster => {
+            validClusters.forEach(cluster => {
                 const outputRoot = this.root.map(token => {
                     if (token.startsWith('%')) {
                         const assumption = [...cluster.assumptions].find(([key, value]) => key === token);
@@ -474,9 +494,7 @@ const ReimSY = (function() {
             });
         }
 
-
         evaluate() {
-
             return this.clusters.filter(cluster => this.logicFunction(cluster, this.children.length));
         }
 
