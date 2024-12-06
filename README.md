@@ -15,7 +15,9 @@ console.log(result); // [["LED", "color", "green"]]
 ## Simple If-statement
 
 demo.add("device", "status", "on", "if", "LED", "color", "green");
+
 demo.add("LED", "color", "green");
+
 let result = demo.evaluate();
 console.log(result); // [["LED", "color", "green"], ["device", "status", "on"]]
 
