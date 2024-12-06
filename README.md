@@ -9,7 +9,9 @@ let demo = new ReimSY();
 ## First example
 
 demo.add("LED", "color", "green");
+
 let result = demo.evaluate();
+
 console.log(result); // [["LED", "color", "green"]]
 
 ## Simple If-statement
