@@ -19,22 +19,31 @@ demo.add("device", "status", "on", "if", "LED", "color", "green");
 demo.add("LED", "color", "green");
 
 let result = demo.evaluate();
+
 console.log(result); // [["LED", "color", "green"], ["device", "status", "on"]]
 
 ## And-If-statement
 
 demo.add("device", "status", "on", "and-if", "LED", "color", "green");
+
 demo.add("device", "status", "on", "and-if", "switch", "status", "pressed");
+
 demo.add("LED", "color", "green");
+
 demo.add("switch", "status", "pressed");
+
 let result = demo.evaluate();
+
 console.log(result); // [["LED", "color", "green"], ["switch", "status", "pressed"], ["device", "status", "on"]]
 
 ## Abstract tautology
 
 demo.add("%A", "is eaten by", "%B", "if", "%B", "eats", "%A");
+
 demo.add("Marc", "eats", "ice cream");
+
 let result = demo.evaluate();
+
 console.log(result); // [["Marc", "eats", "ice cream"], ["ice cream", "is eaten by", "Marc"]]
 
 ## Additional Notes:
