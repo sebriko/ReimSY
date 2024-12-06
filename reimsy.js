@@ -9,27 +9,40 @@ Array.prototype.pushArray = function(secondArray) {
 const ReimSY = (function() {
 
     class ReimSY {
+		
+		static LANGUAGES = {
+			de: {
+				phraseTypes: [
+					["und-wenn", ReimSY.checkEqual],
+					["wenn", ReimSY.checkGreaterThanZero],
+					["zähle-wenn", ReimSY.justCount],
+					["oder-wenn", ReimSY.onlyOne],
+					["nicht-wenn", ReimSY.notEvenOne]
+				],
+				negationWord: "nicht"
+			},
+			en: {
+				phraseTypes: [
+					["and-if", ReimSY.checkEqual],
+					["if", ReimSY.checkGreaterThanZero],
+					["count-if", ReimSY.justCount],
+					["or-if", ReimSY.onlyOne],
+					["not-if", ReimSY.notEvenOne]
+				],
+				negationWord: "not"
+			},
+			it: {
+				phraseTypes: [
+					["e-se", ReimSY.checkEqual],
+					["se", ReimSY.checkGreaterThanZero],
+					["conta-se", ReimSY.justCount],
+					["o-se", ReimSY.onlyOne],
+					["non-se", ReimSY.notEvenOne]
+				],
+				negationWord: "non"
+			}
+		};
 
-        static PHRASETYPES = [
-            ["and-if", ReimSY.checkEqual],
-            ["if", ReimSY.checkGreaterThanZero],
-            ["count-if", ReimSY.justCount],
-            ["or-if", ReimSY.onlyOne],
-			["not-if", ReimSY.notEvenOne]
-        ];
-		
-		static NEGATIONWORD = "not";
-		
-		static PHRASETYPES_DE = [
-            ["und-wenn", ReimSY.checkEqual],
-            ["wenn", ReimSY.checkGreaterThanZero],
-            ["zähle-wenn", ReimSY.justCount],
-            ["oder-wenn", ReimSY.onlyOne],
-			["nicht-wenn", ReimSY.notEvenOne]
-        ];
-		
-		static NEGATIONWORD_DE = "nicht";
-		
         static checkEqual(cluster, childrenLength) {
             return cluster.targetNumber === childrenLength;
         }
@@ -72,7 +85,6 @@ const ReimSY = (function() {
             );
         }
 
-
         static processHash(value, hashtable) {
             let hash = JSON.stringify(value);
             if (!hashtable.has(hash)) {
@@ -83,10 +95,15 @@ const ReimSY = (function() {
         }
 
         constructor(lang = 'en') {
+			
+			const config = ReimSY.LANGUAGES[lang];
+			
+			if (!config) throw new Error(`Language "${lang}" not supported.`);
+			
             this.sentenceFinder = new PhraseFinder();
             this.phraseFinder = new PhraseFinder();
-			this.phraseTypes = this.lang === 'en' ? ReimSY.PHRASETYPES : ReimSY.PHRASETYPES_DE;
-			this.negationWord = this.lang === 'en' ? ReimSY.NEGATIONWORD : ReimSY.NEGATIONWORD_DE;
+			this.phraseTypes = config.phraseTypes;
+			this.negationWord = config.negationWord;
             this.sentences = [];
             this.allValidFormulas = [];
             this.output = [];
@@ -194,11 +211,8 @@ const ReimSY = (function() {
                     let value = subArray[2];
 
                     this.allValidFormulas.forEach(formula => {
-
                         if (formula.dependencies.hasOwnProperty(key)) {
-
                             formula.dependencies[key] = parseFloat(value);
-
                         }
                     });
                 }
@@ -224,11 +238,8 @@ const ReimSY = (function() {
 
 
         debug() {
-
             this.sentences.forEach(sentence => {
-
                 sentence.debug();
-
             });
         }
 
@@ -270,7 +281,6 @@ const ReimSY = (function() {
         }
 
         createFunction(formula) {
-
             formula = formula.replace(/\b(?!sqrt|sin|cos|tan|PI)[a-zA-Z]+\b/g, 'params.$&');
             formula = formula.replace(/\^/g, '**');
             formula = formula.replace(/sqrt/g, 'Math.sqrt');
@@ -278,15 +288,14 @@ const ReimSY = (function() {
             formula = formula.replace(/cos/g, 'Math.cos');
             formula = formula.replace(/tan/g, 'Math.tan');
             formula = formula.replace(/PI/g, 'Math.PI');
-
+			
             return new Function('params', 'return ' + formula);
 
         }
 
         evaluate() {
-
             this.result = this.compute(this.dependencies);
-
+			
             return this.result;
         }
 
@@ -503,15 +512,11 @@ const ReimSY = (function() {
             console.log("%c   Group citerion:", "color: red;", this.head);
 
             this.children.forEach(entry => {
-
                 entry.debug();
-
             });
 
             this.clusters.forEach(entry => {
-
                 entry.debug();
-
             });
 
         }
@@ -555,9 +560,7 @@ const ReimSY = (function() {
 		}
 
         debug() {
-
             console.log("%c      Phrase:", "color: blue;", this.root.join(' '));
-
         }
 
     }
