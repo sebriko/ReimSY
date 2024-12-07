@@ -5,7 +5,7 @@ Array.prototype.pushArray = function(secondArray) {
         this.push(item);
     });
 };
-
+ 
 const ReimSY = (function() {
 
     class ReimSY {
@@ -550,6 +550,7 @@ const ReimSY = (function() {
             });
 			
 			this.clusterized = true;
+			
 			}
 
         }
