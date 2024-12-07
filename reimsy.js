@@ -550,7 +550,6 @@ const ReimSY = (function() {
             });
 			
 			this.clusterized = true;
-			
 			}
 
         }
