@@ -19,7 +19,8 @@ const ReimSY = (function() {
 					["oder-wenn", ReimSY.onlyOne],
 					["nicht-wenn", ReimSY.notEvenOne]
 				],
-				negationWord: "nicht"
+				negationWord: "nicht",
+				undefinedWord: "nicht definiert"
 			},
 			en: {
 				phraseTypes: [
@@ -29,7 +30,8 @@ const ReimSY = (function() {
 					["or-if", ReimSY.onlyOne],
 					["not-if", ReimSY.notEvenOne]
 				],
-				negationWord: "not"
+				negationWord: "not",
+				undefinedWord: "not defined"
 			},
 			it: {
 				phraseTypes: [
@@ -39,7 +41,8 @@ const ReimSY = (function() {
 					["o-se", ReimSY.onlyOne],
 					["non-se", ReimSY.notEvenOne]
 				],
-				negationWord: "non"
+				negationWord: "non",
+				undefinedWord: "non definito"
 			}
 		};
 
@@ -70,9 +73,8 @@ const ReimSY = (function() {
             }
 
             const decimalSeparator = commaAsDecimal ? ',' : '.';
-
             const normalizedValue = value.replace(',', '.');
-
+			
             return !isNaN(Number(normalizedValue));
 
         }
@@ -104,9 +106,11 @@ const ReimSY = (function() {
             this.phraseFinder = new PhraseFinder();
 			this.phraseTypes = config.phraseTypes;
 			this.negationWord = config.negationWord;
+			this.undefinedWord = config.undefinedWord;
             this.sentences = [];
             this.allValidFormulas = [];
             this.output = [];
+			this.input = [];
             this.inputHashtable = new Set();
             this.outputHashtable = new Set();
             this.numberOfLoops = 5;
@@ -158,50 +162,92 @@ const ReimSY = (function() {
         clusterize() {
 			this.sentences.forEach(sentence => sentence.clusterize());
         }
+		
+		filterOutput(tempInput) {
+			let seenKeys = new Set();
+
+			return tempInput.filter((currentSubArray) => {
+				if (currentSubArray[1] !== "=") return true;
+
+				const thirdElement = currentSubArray[2];
+				const isNumber = ReimSY.isNumber(thirdElement);
+				const isUndefined = thirdElement === "undefined";
+
+				if (!isNumber && !isUndefined) return false;
+
+				if (isNumber) {
+					const key = currentSubArray[0];
+					if (seenKeys.has(key)) return false;
+					seenKeys.add(key);
+				}
+
+				return true;
+			});
+		}
+
+
 
         evaluate() {
 
             for (let i = 0; i < this.numberOfLoops; i++) {
 
                 let tempOutput = [];
-
+				
                 this.synthesize();
-
                 this.clusterize();
-
                 tempOutput = this.sentences.flatMap(sentence =>
                     sentence.evaluate().filter(value => ReimSY.processHash(value, this.outputHashtable))
                 );
 
                 this.createMathFormulas(tempOutput);
-
                 tempOutput.pushArray(this.evalMath().filter(value => ReimSY.processHash(value, this.outputHashtable)));
 
                 let newInformation = ReimSY.filterUniqueSubarrays(this.output, tempOutput)
-
+				this.refreshMathFormulas(newInformation)
                 this.output.pushArray(newInformation);
 
                 this.addBatch(newInformation)
 
             }
+			
+			this.output = this.filterOutput(this.output);
 
             return this.output;
         }
 
 
         createMathFormulas(input) {
-
+			
             input.forEach(subArray => {
 
                 if (subArray[1] === "=" && ReimSY.isNumber(subArray[2]) === false) {
 
-                    let mathFormula = new MathFormula(subArray);
+                    let mathFormula = new MathFormula(subArray, this.undefinedWord);
 
                     this.allValidFormulas.push(mathFormula)
 
                 }
             });
 
+
+            input.forEach(subArray => {
+
+                if (subArray[1] === "=" && ReimSY.isNumber(subArray[2]) === true) {
+
+                    let key = subArray[0];
+                    let value = subArray[2];
+
+                    this.allValidFormulas.forEach(formula => {
+                        if (formula.dependencies.hasOwnProperty(key)) {
+                            formula.dependencies[key] = parseFloat(value);
+                        }
+                    });
+                }
+            });
+
+        }
+		
+		refreshMathFormulas(input) {
 
             input.forEach(subArray => {
 
@@ -270,8 +316,9 @@ const ReimSY = (function() {
 
 
     class MathFormula {
-        constructor(formula) {
+        constructor(formula, undefinedWord) {
             this.formula = formula;
+			this.undefinedWord = undefinedWord;
             this.result = null;
             this.name = formula[0];
             this.formContent = formula[2];
@@ -295,6 +342,10 @@ const ReimSY = (function() {
 
         evaluate() {
             this.result = this.compute(this.dependencies);
+			
+			if (isNaN(this.result)) {
+				return this.undefinedWord;
+			}
 			
             return this.result;
         }
@@ -537,22 +588,16 @@ const ReimSY = (function() {
 			if (this.clusterized === false) {
 				
 			this.clearCluster();
-
             this.clusterElements = [];
-
             this.children.forEach(entry => {
 				
                 const newClusterElement = new ClusterElement(entry, this);
-
                 this.clusterElements.push(newClusterElement);
 	
-
             });
 			
 			this.clusterized = true;
-			
 			}
-
         }
 		
 		clearCluster() {
@@ -601,9 +646,7 @@ const ReimSY = (function() {
                 entry.debug();
 
             });
-
         }
-
     }
 
     class ClusterElement extends Observable {
@@ -648,7 +691,6 @@ const ReimSY = (function() {
 
             }
         }
-
     }
 
     class PhraseFinder {
