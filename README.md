@@ -9,6 +9,7 @@ Here is an example: https://codepen.io/animiert/pen/emYJQXx?editors=1111
 - Alternative to small databases
 - Learning apps and games
 - Intelligent forms (diagnose, configuration etc.)
+- Teaching everyday logic
 
 ## Creating an Instance
 
