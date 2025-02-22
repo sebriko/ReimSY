@@ -17,45 +17,70 @@ let demo = new ReimSY("en"); // "en" means, that operators like "if" are Englisc
 
 ## First example
 
-demo.add("LED", "color", "green");
-
+let demo = new ReimSY("en"); 
+demo.add(["LED", "color", "green"]);
 let result = demo.evaluate();
+console.log(result[0]); // Output ["LED","color","green"]
 
-console.log(result); // [["LED", "color", "green"]]
+Demo: https://codepen.io/animiert/pen/XJWKJyW
 
 ## Simple If-statement
 
-demo.add("device", "status", "on", "if", "LED", "color", "green");
-
-demo.add("LED", "color", "green");
-
+let demo = new ReimSY("en"); 
+demo.add(["LED", "color", "green"]);
+demo.add(["device", "status", "on", "if", "LED", "color", "green"]);
 let result = demo.evaluate();
+console.log(result); 
+/* Output:
+[
+["LED","color","green"], 
+["device","status","on"]
+]
+*/
 
-console.log(result); // [["LED", "color", "green"], ["device", "status", "on"]]
-
-## And-If-statement
-
-demo.add("device", "status", "on", "and-if", "LED", "color", "green");
-
-demo.add("device", "status", "on", "and-if", "switch", "status", "pressed");
-
-demo.add("LED", "color", "green");
-
-demo.add("switch", "status", "pressed");
-
-let result = demo.evaluate();
-
-console.log(result); // [["LED", "color", "green"], ["switch", "status", "pressed"], ["device", "status", "on"]]
+Demo: https://codepen.io/animiert/pen/raNLaRN
 
 ## Abstract tautology
 
-demo.add("%A", "is eaten by", "%B", "if", "%B", "eats", "%A");
-
-demo.add("Marc", "eats", "ice cream");
-
+let demo = new ReimSY("en"); 
+demo.add(["%A", "is eaten by", "%B", "if", "%B", "eats", "%A"]);
+demo.add(["Marc", "eats", "ice cream"]);
 let result = demo.evaluate();
+console.log(result); 
+/* Output:
+[
+["ice cream","is eaten by","Marc"],
+["Marc","eats","ice cream"]
+]
+*/
 
-console.log(result); // [["Marc", "eats", "ice cream"], ["ice cream", "is eaten by", "Marc"]]
+Demo: https://codepen.io/animiert/pen/NPWrPVE
+
+## Batch method
+
+let demo = new ReimSY("en"); 
+demo.addBatch([
+  ["%A", "is eaten by", "%B", "if", "%B", "eats", "%A"],
+  ["Marc", "eats", "ice cream"]
+]);
+let result = demo.evaluate();
+console.log(result); 
+/*Output 
+[
+  ["ice cream","is eaten by","Marc"],
+  ["Marc","eats","ice cream"]
+]
+*/[
+
+Demo: https://codepen.io/animiert/pen/YPzWPmr?editors=1111
+
+## Logical operators
+
+- and-if: conjunction (∧)
+- if: implication (→)
+- count-if: implication (→) and counting 
+- or-if: disjunction (∨)
+- not-if: negation (¬)
 
 ## Additional Notes:
 
