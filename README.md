@@ -2,9 +2,11 @@
 
 ReimSY is a lightweight JS class for evaluating logical statements.
 
+Here is an example: https://codepen.io/animiert/pen/emYJQXx?editors=1111
+
 ## Creating an Instance
 
-let demo = new ReimSY();
+let demo = new ReimSY("en"); // "en" means, that word like "if" are Englisch. 
 
 ## First example
 
