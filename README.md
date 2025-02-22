@@ -19,23 +19,23 @@ let demo = new ReimSY("en"); // "en" means, that operators like "if" are Englisc
 
 let demo = new ReimSY("en");  
 demo.add(["LED", "color", "green"]);  
-let result = demo.evaluate(); 
+let result = demo.evaluate();  
 console.log(result[0]); // Output ["LED","color","green"]
 
 Demo: https://codepen.io/animiert/pen/XJWKJyW
 
 ## Simple If-statement
 
-let demo = new ReimSY("en"); 
-demo.add(["LED", "color", "green"]);
-demo.add(["device", "status", "on", "if", "LED", "color", "green"]);
-let result = demo.evaluate();
-console.log(result); 
-/* Output:
-[
-["LED","color","green"], 
-["device","status","on"]
-]
+let demo = new ReimSY("en");  
+demo.add(["LED", "color", "green"]);  
+demo.add(["device", "status", "on", "if", "LED", "color", "green"]);  
+let result = demo.evaluate();  
+console.log(result);  
+/* Output:  
+[  
+["LED","color","green"],  
+["device","status","on"]  
+]  
 */
 
 Demo: https://codepen.io/animiert/pen/raNLaRN
