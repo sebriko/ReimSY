@@ -42,35 +42,35 @@ Demo: https://codepen.io/animiert/pen/raNLaRN
 
 ## Abstract tautology
 
-let demo = new ReimSY("en"); 
-demo.add(["%A", "is eaten by", "%B", "if", "%B", "eats", "%A"]);
-demo.add(["Marc", "eats", "ice cream"]);
-let result = demo.evaluate();
-console.log(result); 
-/* Output:
-[
-["ice cream","is eaten by","Marc"],
-["Marc","eats","ice cream"]
-]
+let demo = new ReimSY("en");  
+demo.add(["%A", "is eaten by", "%B", "if", "%B", "eats", "%A"]);  
+demo.add(["Marc", "eats", "ice cream"]);  
+let result = demo.evaluate();  
+console.log(result);  
+/* Output:  
+[  
+["ice cream","is eaten by","Marc"],  
+["Marc","eats","ice cream"]  
+]  
 */
 
 Demo: https://codepen.io/animiert/pen/NPWrPVE
 
 ## Batch method
 
-let demo = new ReimSY("en"); 
-demo.addBatch([
-  ["%A", "is eaten by", "%B", "if", "%B", "eats", "%A"],
-  ["Marc", "eats", "ice cream"]
-]);
-let result = demo.evaluate();
-console.log(result); 
-/*Output 
-[
-  ["ice cream","is eaten by","Marc"],
-  ["Marc","eats","ice cream"]
-]
-*/[
+let demo = new ReimSY("en");  
+demo.addBatch([  
+  ["%A", "is eaten by", "%B", "if", "%B", "eats", "%A"],  
+  ["Marc", "eats", "ice cream"]  
+]);  
+let result = demo.evaluate();  
+console.log(result);  
+/*Output  
+[  
+  ["ice cream","is eaten by","Marc"],  
+  ["Marc","eats","ice cream"]  
+]  
+*/
 
 Demo: https://codepen.io/animiert/pen/YPzWPmr?editors=1111
 
