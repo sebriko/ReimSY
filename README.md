@@ -17,8 +17,8 @@ let demo = new ReimSY("en"); // "en" means, that operators like "if" are Englisc
 
 ## First example
 
-let demo = new ReimSY("en"); 
-demo.add(["LED", "color", "green"]);
+let demo = new ReimSY("en");  
+demo.add(["LED", "color", "green"]);  
 let result = demo.evaluate();
 console.log(result[0]); // Output ["LED","color","green"]
 
