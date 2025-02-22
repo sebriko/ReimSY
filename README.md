@@ -13,7 +13,7 @@ Here is an example: https://codepen.io/animiert/pen/emYJQXx?editors=1111
 
 ## Creating an Instance
 
-let demo = new ReimSY("en"); // "en" means, that word like "if" are Englisch. 
+let demo = new ReimSY("en"); // "en" means, that operators like "if" are Englisch. 
 
 ## First example
 
