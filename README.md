@@ -4,6 +4,12 @@ ReimSY is a lightweight JS class for evaluating logical statements.
 
 Here is an example: https://codepen.io/animiert/pen/emYJQXx?editors=1111
 
+## Possible applications
+
+- Alternative to small databases
+- Learning apps and games
+- Intelligent forms (diagnose, configuration etc.)
+
 ## Creating an Instance
 
 let demo = new ReimSY("en"); // "en" means, that word like "if" are Englisch. 
