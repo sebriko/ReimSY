@@ -25,7 +25,7 @@ console.log(result[0]); // Output ["LED","color","green"]
 Demo: https://codepen.io/animiert/pen/XJWKJyW
 
 ## Simple If-statement
-
+```
 let demo = new ReimSY("en");  
 demo.add(["LED", "color", "green"]);  
 demo.add(["device", "status", "on", "if", "LED", "color", "green"]);  
@@ -37,11 +37,11 @@ console.log(result);
 ["device","status","on"]  
 ]  
 */
-
+```
 Demo: https://codepen.io/animiert/pen/raNLaRN
 
 ## Abstract tautology
-
+```
 let demo = new ReimSY("en");  
 demo.add(["%A", "is eaten by", "%B", "if", "%B", "eats", "%A"]);  
 demo.add(["Marc", "eats", "ice cream"]);  
@@ -53,11 +53,11 @@ console.log(result);
 ["Marc","eats","ice cream"]  
 ]  
 */
-
+```
 Demo: https://codepen.io/animiert/pen/NPWrPVE
 
 ## Batch method
-
+```
 let demo = new ReimSY("en");  
 demo.addBatch([  
   ["%A", "is eaten by", "%B", "if", "%B", "eats", "%A"],  
@@ -71,7 +71,7 @@ console.log(result);
   ["Marc","eats","ice cream"]  
 ]  
 */
-
+```
 Demo: https://codepen.io/animiert/pen/YPzWPmr?editors=1111
 
 ## Logical operators
