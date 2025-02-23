@@ -16,12 +16,12 @@ Here is an example: https://codepen.io/animiert/pen/emYJQXx?editors=1111
 let demo = new ReimSY("en"); // "en" means, that operators like "if" are Englisch. 
 
 ## First example
-
+```
 let demo = new ReimSY("en");  
 demo.add(["LED", "color", "green"]);  
 let result = demo.evaluate();  
 console.log(result[0]); // Output ["LED","color","green"]
-
+```
 Demo: https://codepen.io/animiert/pen/XJWKJyW
 
 ## Simple If-statement
